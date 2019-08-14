@@ -15,9 +15,8 @@
  * @category   Zend
  * @package    Zend_View
  * @subpackage Helper
- * @copyright  Copyright (c) 2005-2014 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id$
  */
 
 
@@ -33,7 +32,7 @@
  * @category   Zend
  * @package    Zend_View
  * @subpackage Helper
- * @copyright  Copyright (c) 2005-2014 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 class Zend_View_Helper_FormRadio extends Zend_View_Helper_FormElement
@@ -76,7 +75,7 @@ class Zend_View_Helper_FormRadio extends Zend_View_Helper_FormElement
         extract($info); // name, value, attribs, options, listsep, disable
 
         // retrieve attributes for labels (prefixed with 'label_' or 'label')
-        $label_attribs = array();
+        $label_attribs = array('style' => 'white-space: nowrap;');
         foreach ($attribs as $key => $val) {
             $tmp    = false;
             $keyLen = strlen($key);
@@ -113,7 +112,7 @@ class Zend_View_Helper_FormRadio extends Zend_View_Helper_FormElement
         // build the element
         $xhtml = '';
         $list  = array();
-
+        
         // should the name affect an array collection?
         $name = $this->view->escape($name);
         if ($this->_isArray && ('[]' != substr($name, -2))) {
@@ -123,14 +122,15 @@ class Zend_View_Helper_FormRadio extends Zend_View_Helper_FormElement
         // ensure value is an array to allow matching multiple times
         $value = (array) $value;
 
-        // Set up the filter - Alnum + hyphen + underscore
-        #require_once 'Zend/Filter/PregReplace.php';
-        $pattern = @preg_match('/\pL/u', 'a') 
-            ? '/[^\p{L}\p{N}\-\_]/u'    // Unicode
-            : '/[^a-zA-Z0-9\-\_]/';     // No Unicode
-        $filter = new Zend_Filter_PregReplace($pattern, "");
-        
+        // XHTML or HTML end tag?
+        $endTag = ' />';
+        if (($this->view instanceof Zend_View_Abstract) && !$this->view->doctype()->isXhtml()) {
+            $endTag= '>';
+        }
+
         // add radio buttons to the list.
+        #require_once 'Zend/Filter/Alnum.php';
+        $filter = new Zend_Filter_Alnum();
         foreach ($options as $opt_value => $opt_label) {
 
             // Should the label be escaped?
@@ -165,18 +165,13 @@ class Zend_View_Helper_FormRadio extends Zend_View_Helper_FormElement
                     . ' value="' . $this->view->escape($opt_value) . '"'
                     . $checked
                     . $disabled
-                    . $this->_htmlAttribs($attribs)
-                    . $this->getClosingBracket()
+                    . $this->_htmlAttribs($attribs) 
+                    . $endTag
                     . (('append' == $labelPlacement) ? $opt_label : '')
                     . '</label>';
 
             // add to the array of radio buttons
             $list[] = $radio;
-        }
-        
-        // XHTML or HTML for standard list separator?
-        if (!$this->_isXhtml() && false !== strpos($listsep, '<br />')) {
-            $listsep = str_replace('<br />', '<br>', $listsep);
         }
 
         // done!

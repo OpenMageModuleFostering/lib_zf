@@ -12,12 +12,10 @@
  * obtain it through the world-wide-web, please send an email
  * to license@zend.com so we can send you a copy immediately.
  *
- * @category   Zend
  * @package    Zend_Pdf
  * @subpackage FileParser
- * @copyright  Copyright (c) 2005-2014 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id$
  */
 
 /**
@@ -35,7 +33,7 @@
  *
  * @package    Zend_Pdf
  * @subpackage FileParser
- * @copyright  Copyright (c) 2005-2014 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 abstract class Zend_Pdf_FileParserDataSource
@@ -61,6 +59,21 @@ abstract class Zend_Pdf_FileParserDataSource
 
 
   /* Abstract Methods */
+
+    /**
+     * Object constructor. Opens the data source for parsing.
+     *
+     * Must set $this->_size to the total size in bytes of the data source.
+     *
+     * Upon return the data source can be interrogated using the primitive
+     * methods described here.
+     *
+     * If the data source cannot be opened for any reason (such as insufficient
+     * permissions, missing file, etc.), will throw an appropriate exception.
+     *
+     * @throws Zend_Pdf_Exception
+     */
+    abstract public function __construct();
 
     /**
      * Object destructor. Closes the data source.

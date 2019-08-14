@@ -14,15 +14,20 @@
  *
  * @category   Zend
  * @package    Zend_Validate
- * @copyright  Copyright (c) 2005-2014 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id$
+ * @version    $Id: Hostname.php 13221 2008-12-14 11:20:25Z thomas $
  */
 
 /**
  * @see Zend_Validate_Abstract
  */
 #require_once 'Zend/Validate/Abstract.php';
+
+/**
+ * @see Zend_Loader
+ */
+#require_once 'Zend/Loader.php';
 
 /**
  * @see Zend_Validate_Ip
@@ -41,38 +46,32 @@
  *
  * @category   Zend
  * @package    Zend_Validate
- * @copyright  Copyright (c) 2005-2014 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 class Zend_Validate_Hostname extends Zend_Validate_Abstract
 {
-    const CANNOT_DECODE_PUNYCODE  = 'hostnameCannotDecodePunycode';
-    const INVALID                 = 'hostnameInvalid';
-    const INVALID_DASH            = 'hostnameDashCharacter';
-    const INVALID_HOSTNAME        = 'hostnameInvalidHostname';
-    const INVALID_HOSTNAME_SCHEMA = 'hostnameInvalidHostnameSchema';
-    const INVALID_LOCAL_NAME      = 'hostnameInvalidLocalName';
-    const INVALID_URI             = 'hostnameInvalidUri';
     const IP_ADDRESS_NOT_ALLOWED  = 'hostnameIpAddressNotAllowed';
-    const LOCAL_NAME_NOT_ALLOWED  = 'hostnameLocalNameNotAllowed';
-    const UNDECIPHERABLE_TLD      = 'hostnameUndecipherableTld';
     const UNKNOWN_TLD             = 'hostnameUnknownTld';
+    const INVALID_DASH            = 'hostnameDashCharacter';
+    const INVALID_HOSTNAME_SCHEMA = 'hostnameInvalidHostnameSchema';
+    const UNDECIPHERABLE_TLD      = 'hostnameUndecipherableTld';
+    const INVALID_HOSTNAME        = 'hostnameInvalidHostname';
+    const INVALID_LOCAL_NAME      = 'hostnameInvalidLocalName';
+    const LOCAL_NAME_NOT_ALLOWED  = 'hostnameLocalNameNotAllowed';
 
     /**
      * @var array
      */
     protected $_messageTemplates = array(
-        self::CANNOT_DECODE_PUNYCODE  => "'%value%' appears to be a DNS hostname but the given punycode notation cannot be decoded",
-        self::INVALID                 => "Invalid type given. String expected",
-        self::INVALID_DASH            => "'%value%' appears to be a DNS hostname but contains a dash in an invalid position",
-        self::INVALID_HOSTNAME        => "'%value%' does not match the expected structure for a DNS hostname",
-        self::INVALID_HOSTNAME_SCHEMA => "'%value%' appears to be a DNS hostname but cannot match against hostname schema for TLD '%tld%'",
-        self::INVALID_LOCAL_NAME      => "'%value%' does not appear to be a valid local network name",
-        self::INVALID_URI             => "'%value%' does not appear to be a valid URI hostname",
         self::IP_ADDRESS_NOT_ALLOWED  => "'%value%' appears to be an IP address, but IP addresses are not allowed",
-        self::LOCAL_NAME_NOT_ALLOWED  => "'%value%' appears to be a local network name but local network names are not allowed",
-        self::UNDECIPHERABLE_TLD      => "'%value%' appears to be a DNS hostname but cannot extract TLD part",
         self::UNKNOWN_TLD             => "'%value%' appears to be a DNS hostname but cannot match TLD against known list",
+        self::INVALID_DASH            => "'%value%' appears to be a DNS hostname but contains a dash (-) in an invalid position",
+        self::INVALID_HOSTNAME_SCHEMA => "'%value%' appears to be a DNS hostname but cannot match against hostname schema for TLD '%tld%'",
+        self::UNDECIPHERABLE_TLD      => "'%value%' appears to be a DNS hostname but cannot extract TLD part",
+        self::INVALID_HOSTNAME        => "'%value%' does not match the expected structure for a DNS hostname",
+        self::INVALID_LOCAL_NAME      => "'%value%' does not appear to be a valid local network name",
+        self::LOCAL_NAME_NOT_ALLOWED  => "'%value%' appears to be a local network name but local network names are not allowed"
     );
 
     /**
@@ -100,784 +99,74 @@ class Zend_Validate_Hostname extends Zend_Validate_Abstract
     /**
      * Allows all types of hostnames
      */
-    const ALLOW_URI = 8;
+    const ALLOW_ALL   = 7;
 
     /**
-     * Allows all types of hostnames
+     * Whether IDN domains are validated
+     *
+     * @var boolean
      */
-    const ALLOW_ALL = 15;
+    private $_validateIdn = true;
+
+    /**
+     * Whether TLDs are validated against a known list
+     *
+     * @var boolean
+     */
+    private $_validateTld = true;
+
+    /**
+     * Bit field of ALLOW constants; determines which types of hostnames are allowed
+     *
+     * @var integer
+     */
+    protected $_allow;
+
+    /**
+     * Bit field of CHECK constants; determines what additional hostname checks to make
+     *
+     * @var unknown_type
+     */
+    // protected $_check;
 
     /**
      * Array of valid top-level-domains
      *
-     * Version 2014050501, Last Updated Tue May  6 07:07:01 2014 UTC
-     *
-     * @see http://data.iana.org/TLD/tlds-alpha-by-domain.txt  List of all TLDs by domain
-     * @see http://www.iana.org/domains/root/db/ Official list of supported TLDs
      * @var array
+     * @see ftp://data.iana.org/TLD/tlds-alpha-by-domain.txt  List of all TLDs by domain
      */
     protected $_validTlds = array(
-        'ac',
-        'academy',
-        'actor',
-        'ad',
-        'ae',
-        'aero',
-        'af',
-        'ag',
-        'agency',
-        'ai',
-        'airforce',
-        'al',
-        'am',
-        'an',
-        'ao',
-        'aq',
-        'ar',
-        'archi',
-        'arpa',
-        'as',
-        'asia',
-        'associates',
-        'at',
-        'au',
-        'aw',
-        'ax',
-        'axa',
-        'az',
-        'ba',
-        'bar',
-        'bargains',
-        'bayern',
-        'bb',
-        'bd',
-        'be',
-        'berlin',
-        'best',
-        'bf',
-        'bg',
-        'bh',
-        'bi',
-        'bid',
-        'bike',
-        'biz',
-        'bj',
-        'black',
-        'blackfriday',
-        'blue',
-        'bm',
-        'bn',
-        'bo',
-        'boutique',
-        'br',
-        'bs',
-        'bt',
-        'build',
-        'builders',
-        'buzz',
-        'bv',
-        'bw',
-        'by',
-        'bz',
-        'ca',
-        'cab',
-        'camera',
-        'camp',
-        'capital',
-        'cards',
-        'care',
-        'career',
-        'careers',
-        'cash',
-        'cat',
-        'catering',
-        'cc',
-        'cd',
-        'center',
-        'ceo',
-        'cf',
-        'cg',
-        'ch',
-        'cheap',
-        'christmas',
-        'ci',
-        'citic',
-        'ck',
-        'cl',
-        'cleaning',
-        'clinic',
-        'clothing',
-        'club',
-        'cm',
-        'cn',
-        'co',
-        'codes',
-        'coffee',
-        'college',
-        'cologne',
-        'com',
-        'community',
-        'company',
-        'computer',
-        'condos',
-        'construction',
-        'consulting',
-        'contractors',
-        'cooking',
-        'cool',
-        'coop',
-        'country',
-        'cr',
-        'creditcard',
-        'cruises',
-        'cu',
-        'cv',
-        'cw',
-        'cx',
-        'cy',
-        'cz',
-        'dance',
-        'dating',
-        'de',
-        'democrat',
-        'dental',
-        'desi',
-        'diamonds',
-        'directory',
-        'discount',
-        'dj',
-        'dk',
-        'dm',
-        'dnp',
-        'do',
-        'domains',
-        'dz',
-        'ec',
-        'edu',
-        'education',
-        'ee',
-        'eg',
-        'email',
-        'engineering',
-        'enterprises',
-        'equipment',
-        'er',
-        'es',
-        'estate',
-        'et',
-        'eu',
-        'eus',
-        'events',
-        'exchange',
-        'expert',
-        'exposed',
-        'fail',
-        'farm',
-        'feedback',
-        'fi',
-        'finance',
-        'financial',
-        'fish',
-        'fishing',
-        'fitness',
-        'fj',
-        'fk',
-        'flights',
-        'florist',
-        'fm',
-        'fo',
-        'foo',
-        'foundation',
-        'fr',
-        'frogans',
-        'fund',
-        'furniture',
-        'futbol',
-        'ga',
-        'gal',
-        'gallery',
-        'gb',
-        'gd',
-        'ge',
-        'gf',
-        'gg',
-        'gh',
-        'gi',
-        'gift',
-        'gl',
-        'glass',
-        'globo',
-        'gm',
-        'gmo',
-        'gn',
-        'gop',
-        'gov',
-        'gp',
-        'gq',
-        'gr',
-        'graphics',
-        'gratis',
-        'gripe',
-        'gs',
-        'gt',
-        'gu',
-        'guitars',
-        'guru',
-        'gw',
-        'gy',
-        'haus',
-        'hk',
-        'hm',
-        'hn',
-        'holdings',
-        'holiday',
-        'horse',
-        'house',
-        'hr',
-        'ht',
-        'hu',
-        'id',
-        'ie',
-        'il',
-        'im',
-        'immobilien',
-        'in',
-        'industries',
-        'info',
-        'ink',
-        'institute',
-        'insure',
-        'int',
-        'international',
-        'investments',
-        'io',
-        'iq',
-        'ir',
-        'is',
-        'it',
-        'je',
-        'jetzt',
-        'jm',
-        'jo',
-        'jobs',
-        'jp',
-        'kaufen',
-        'ke',
-        'kg',
-        'kh',
-        'ki',
-        'kim',
-        'kitchen',
-        'kiwi',
-        'km',
-        'kn',
-        'koeln',
-        'kp',
-        'kr',
-        'kred',
-        'kw',
-        'ky',
-        'kz',
-        'la',
-        'land',
-        'lb',
-        'lc',
-        'lease',
-        'li',
-        'lighting',
-        'limited',
-        'limo',
-        'link',
-        'lk',
-        'london',
-        'lr',
-        'ls',
-        'lt',
-        'lu',
-        'luxury',
-        'lv',
-        'ly',
-        'ma',
-        'maison',
-        'management',
-        'mango',
-        'marketing',
-        'mc',
-        'md',
-        'me',
-        'media',
-        'meet',
-        'menu',
-        'mg',
-        'mh',
-        'miami',
-        'mil',
-        'mk',
-        'ml',
-        'mm',
-        'mn',
-        'mo',
-        'mobi',
-        'moda',
-        'moe',
-        'monash',
-        'moscow',
-        'mp',
-        'mq',
-        'mr',
-        'ms',
-        'mt',
-        'mu',
-        'museum',
-        'mv',
-        'mw',
-        'mx',
-        'my',
-        'mz',
-        'na',
-        'nagoya',
-        'name',
-        'nc',
-        'ne',
-        'net',
-        'neustar',
-        'nf',
-        'ng',
-        'ni',
-        'ninja',
-        'nl',
-        'no',
-        'np',
-        'nr',
-        'nu',
-        'nyc',
-        'nz',
-        'okinawa',
-        'om',
-        'onl',
-        'org',
-        'pa',
-        'paris',
-        'partners',
-        'parts',
-        'pe',
-        'pf',
-        'pg',
-        'ph',
-        'photo',
-        'photography',
-        'photos',
-        'pics',
-        'pictures',
-        'pink',
-        'pk',
-        'pl',
-        'plumbing',
-        'pm',
-        'pn',
-        'post',
-        'pr',
-        'pro',
-        'productions',
-        'properties',
-        'ps',
-        'pt',
-        'pub',
-        'pw',
-        'py',
-        'qa',
-        'qpon',
-        'quebec',
-        're',
-        'recipes',
-        'red',
-        'reisen',
-        'ren',
-        'rentals',
-        'repair',
-        'report',
-        'rest',
-        'reviews',
-        'rich',
-        'ro',
-        'rocks',
-        'rodeo',
-        'rs',
-        'ru',
-        'ruhr',
-        'rw',
-        'ryukyu',
-        'sa',
-        'saarland',
-        'sb',
-        'sc',
-        'schule',
-        'sd',
-        'se',
-        'services',
-        'sexy',
-        'sg',
-        'sh',
-        'shiksha',
-        'shoes',
-        'si',
-        'singles',
-        'sj',
-        'sk',
-        'sl',
-        'sm',
-        'sn',
-        'so',
-        'social',
-        'sohu',
-        'solar',
-        'solutions',
-        'soy',
-        'sr',
-        'st',
-        'su',
-        'supplies',
-        'supply',
-        'support',
-        'surgery',
-        'sv',
-        'sx',
-        'sy',
-        'systems',
-        'sz',
-        'tattoo',
-        'tax',
-        'tc',
-        'td',
-        'technology',
-        'tel',
-        'tf',
-        'tg',
-        'th',
-        'tienda',
-        'tips',
-        'tj',
-        'tk',
-        'tl',
-        'tm',
-        'tn',
-        'to',
-        'today',
-        'tokyo',
-        'tools',
-        'town',
-        'toys',
-        'tp',
-        'tr',
-        'trade',
-        'training',
-        'travel',
-        'tt',
-        'tv',
-        'tw',
-        'tz',
-        'ua',
-        'ug',
-        'uk',
-        'university',
-        'uno',
-        'us',
-        'uy',
-        'uz',
-        'va',
-        'vacations',
-        'vc',
-        've',
-        'vegas',
-        'ventures',
-        'vg',
-        'vi',
-        'viajes',
-        'villas',
-        'vision',
-        'vn',
-        'vodka',
-        'vote',
-        'voting',
-        'voto',
-        'voyage',
-        'vu',
-        'wang',
-        'watch',
-        'webcam',
-        'wed',
-        'wf',
-        'wien',
-        'wiki',
-        'works',
-        'ws',
-        'wtc',
-        'wtf',
-        'xn--3bst00m',
-        'xn--3ds443g',
-        'xn--3e0b707e',
-        'xn--45brj9c',
-        'xn--55qw42g',
-        'xn--55qx5d',
-        'xn--6frz82g',
-        'xn--6qq986b3xl',
-        'xn--80adxhks',
-        'xn--80ao21a',
-        'xn--80asehdb',
-        'xn--80aswg',
-        'xn--90a3ac',
-        'xn--c1avg',
-        'xn--cg4bki',
-        'xn--clchc0ea0b2g2a9gcd',
-        'xn--czru2d',
-        'xn--d1acj3b',
-        'xn--fiq228c5hs',
-        'xn--fiq64b',
-        'xn--fiqs8s',
-        'xn--fiqz9s',
-        'xn--fpcrj9c3d',
-        'xn--fzc2c9e2c',
-        'xn--gecrj9c',
-        'xn--h2brj9c',
-        'xn--i1b6b1a6a2e',
-        'xn--io0a7i',
-        'xn--j1amh',
-        'xn--j6w193g',
-        'xn--kprw13d',
-        'xn--kpry57d',
-        'xn--l1acc',
-        'xn--lgbbat1ad8j',
-        'xn--mgb9awbf',
-        'xn--mgba3a4f16a',
-        'xn--mgbaam7a8h',
-        'xn--mgbab2bd',
-        'xn--mgbayh7gpa',
-        'xn--mgbbh1a71e',
-        'xn--mgbc0a9azcg',
-        'xn--mgberp4a5d4ar',
-        'xn--mgbx4cd0ab',
-        'xn--ngbc5azd',
-        'xn--nqv7f',
-        'xn--nqv7fs00ema',
-        'xn--o3cw4h',
-        'xn--ogbpf8fl',
-        'xn--p1ai',
-        'xn--pgbs0dh',
-        'xn--q9jyb4c',
-        'xn--rhqv96g',
-        'xn--s9brj9c',
-        'xn--ses554g',
-        'xn--unup4y',
-        'xn--wgbh1c',
-        'xn--wgbl6a',
-        'xn--xkc2al3hye2a',
-        'xn--xkc2dl3a5ee0h',
-        'xn--yfro4i67o',
-        'xn--ygbi2ammx',
-        'xn--zfr164b',
-        'xxx',
-        'xyz',
-        'ye',
-        'yokohama',
-        'yt',
-        'za',
-        'zm',
-        'zone',
-        'zw',
-    );
+        'ac', 'ad', 'ae', 'aero', 'af', 'ag', 'ai', 'al', 'am', 'an', 'ao',
+        'aq', 'ar', 'arpa', 'as', 'asia', 'at', 'au', 'aw', 'ax', 'az', 'ba', 'bb',
+        'bd', 'be', 'bf', 'bg', 'bh', 'bi', 'biz', 'bj', 'bm', 'bn', 'bo',
+        'br', 'bs', 'bt', 'bv', 'bw', 'by', 'bz', 'ca', 'cat', 'cc', 'cd',
+        'cf', 'cg', 'ch', 'ci', 'ck', 'cl', 'cm', 'cn', 'co', 'com', 'coop',
+        'cr', 'cu', 'cv', 'cx', 'cy', 'cz', 'de', 'dj', 'dk', 'dm', 'do',
+        'dz', 'ec', 'edu', 'ee', 'eg', 'er', 'es', 'et', 'eu', 'fi', 'fj',
+        'fk', 'fm', 'fo', 'fr', 'ga', 'gb', 'gd', 'ge', 'gf', 'gg', 'gh',
+        'gi', 'gl', 'gm', 'gn', 'gov', 'gp', 'gq', 'gr', 'gs', 'gt', 'gu',
+        'gw', 'gy', 'hk', 'hm', 'hn', 'hr', 'ht', 'hu', 'id', 'ie', 'il',
+        'im', 'in', 'info', 'int', 'io', 'iq', 'ir', 'is', 'it', 'je', 'jm',
+        'jo', 'jobs', 'jp', 'ke', 'kg', 'kh', 'ki', 'km', 'kn', 'kp', 'kr', 'kw',
+        'ky', 'kz', 'la', 'lb', 'lc', 'li', 'lk', 'lr', 'ls', 'lt', 'lu',
+        'lv', 'ly', 'ma', 'mc', 'md', 'me', 'mg', 'mh', 'mil', 'mk', 'ml', 'mm',
+        'mn', 'mo', 'mobi', 'mp', 'mq', 'mr', 'ms', 'mt', 'mu', 'museum', 'mv',
+        'mw', 'mx', 'my', 'mz', 'na', 'name', 'nc', 'ne', 'net', 'nf', 'ng',
+        'ni', 'nl', 'no', 'np', 'nr', 'nu', 'nz', 'om', 'org', 'pa', 'pe',
+        'pf', 'pg', 'ph', 'pk', 'pl', 'pm', 'pn', 'pr', 'pro', 'ps', 'pt',
+        'pw', 'py', 'qa', 're', 'ro', 'rs', 'ru', 'rw', 'sa', 'sb', 'sc', 'sd',
+        'se', 'sg', 'sh', 'si', 'sj', 'sk', 'sl', 'sm', 'sn', 'so', 'sr',
+        'st', 'su', 'sv', 'sy', 'sz', 'tc', 'td', 'tel', 'tf', 'tg', 'th', 'tj',
+        'tk', 'tl', 'tm', 'tn', 'to', 'tp', 'tr', 'travel', 'tt', 'tv', 'tw',
+        'tz', 'ua', 'ug', 'uk', 'um', 'us', 'uy', 'uz', 'va', 'vc', 've',
+        'vg', 'vi', 'vn', 'vu', 'wf', 'ws', 'ye', 'yt', 'yu', 'za', 'zm',
+        'zw'
+        );
 
     /**
      * @var string
      */
     protected $_tld;
-
-    /**
-     * Array for valid Idns
-     * @see http://www.iana.org/domains/idn-tables/ Official list of supported IDN Chars
-     * (.AC) Ascension Island http://www.nic.ac/pdf/AC-IDN-Policy.pdf
-     * (.AR) Argentinia http://www.nic.ar/faqidn.html
-     * (.AS) American Samoa http://www.nic.as/idn/chars.cfm
-     * (.AT) Austria http://www.nic.at/en/service/technical_information/idn/charset_converter/
-     * (.BIZ) International http://www.iana.org/domains/idn-tables/
-     * (.BR) Brazil http://registro.br/faq/faq6.html
-     * (.BV) Bouvett Island http://www.norid.no/domeneregistrering/idn/idn_nyetegn.en.html
-     * (.CA) Canada http://www.iana.org/domains/idn-tables/tables/ca_fr_1.0.html
-     * (.CAT) Catalan http://www.iana.org/domains/idn-tables/tables/cat_ca_1.0.html
-     * (.CH) Switzerland https://nic.switch.ch/reg/ocView.action?res=EF6GW2JBPVTG67DLNIQXU234MN6SC33JNQQGI7L6#anhang1
-     * (.CL) Chile http://www.iana.org/domains/idn-tables/tables/cl_latn_1.0.html
-     * (.COM) International http://www.verisign.com/information-services/naming-services/internationalized-domain-names/index.html
-     * (.DE) Germany http://www.denic.de/en/domains/idns/liste.html
-     * (.DK) Danmark http://www.dk-hostmaster.dk/index.php?id=151
-     * (.ES) Spain https://www.nic.es/media/2008-05/1210147705287.pdf
-     * (.FI) Finland http://www.ficora.fi/en/index/palvelut/fiverkkotunnukset/aakkostenkaytto.html
-     * (.GR) Greece https://grweb.ics.forth.gr/CharacterTable1_en.jsp
-     * (.HU) Hungary http://www.domain.hu/domain/English/szabalyzat/szabalyzat.html
-     * (.INFO) International http://www.nic.info/info/idn
-     * (.IO) British Indian Ocean Territory http://www.nic.io/IO-IDN-Policy.pdf
-     * (.IR) Iran http://www.nic.ir/Allowable_Characters_dot-iran
-     * (.IS) Iceland http://www.isnic.is/domain/rules.php
-     * (.KR) Korea http://www.iana.org/domains/idn-tables/tables/kr_ko-kr_1.0.html
-     * (.LI) Liechtenstein https://nic.switch.ch/reg/ocView.action?res=EF6GW2JBPVTG67DLNIQXU234MN6SC33JNQQGI7L6#anhang1
-     * (.LT) Lithuania http://www.domreg.lt/static/doc/public/idn_symbols-en.pdf
-     * (.MD) Moldova http://www.register.md/
-     * (.MUSEUM) International http://www.iana.org/domains/idn-tables/tables/museum_latn_1.0.html
-     * (.NET) International http://www.verisign.com/information-services/naming-services/internationalized-domain-names/index.html
-     * (.NO) Norway http://www.norid.no/domeneregistrering/idn/idn_nyetegn.en.html
-     * (.NU) Niue http://www.worldnames.net/
-     * (.ORG) International http://www.pir.org/index.php?db=content/FAQs&tbl=FAQs_Registrant&id=2
-     * (.PE) Peru https://www.nic.pe/nuevas_politicas_faq_2.php
-     * (.PL) Poland http://www.dns.pl/IDN/allowed_character_sets.pdf
-     * (.PR) Puerto Rico http://www.nic.pr/idn_rules.asp
-     * (.PT) Portugal https://online.dns.pt/dns_2008/do?com=DS;8216320233;111;+PAGE(4000058)+K-CAT-CODIGO(C.125)+RCNT(100);
-     * (.RU) Russia http://www.iana.org/domains/idn-tables/tables/ru_ru-ru_1.0.html
-     * (.RS) Serbia http://www.iana.org/domains/idn-tables/tables/rs_sr-rs_1.0.pdf
-     * (.SA) Saudi Arabia http://www.iana.org/domains/idn-tables/tables/sa_ar_1.0.html
-     * (.SE) Sweden http://www.iis.se/english/IDN_campaignsite.shtml?lang=en
-     * (.SH) Saint Helena http://www.nic.sh/SH-IDN-Policy.pdf
-     * (.SJ) Svalbard and Jan Mayen http://www.norid.no/domeneregistrering/idn/idn_nyetegn.en.html
-     * (.TH) Thailand http://www.iana.org/domains/idn-tables/tables/th_th-th_1.0.html
-     * (.TM) Turkmenistan http://www.nic.tm/TM-IDN-Policy.pdf
-     * (.TR) Turkey https://www.nic.tr/index.php
-     * (.UA) Ukraine http://www.iana.org/domains/idn-tables/tables/ua_cyrl_1.2.html
-     * (.VE) Venice http://www.iana.org/domains/idn-tables/tables/ve_es_1.0.html
-     * (.VN) Vietnam http://www.vnnic.vn/english/5-6-300-2-2-04-20071115.htm#1.%20Introduction
-     *
-     * @var array
-     */
-    protected $_validIdns = array(
-        'AC'  => array(1 => '/^[\x{002d}0-9a-zà-öø-ÿāăąćĉċčďđēėęěĝġģĥħīįĵķĺļľŀłńņňŋőœŕŗřśŝşšţťŧūŭůűųŵŷźżž]{1,63}$/iu'),
-        'AR'  => array(1 => '/^[\x{002d}0-9a-zà-ãç-êìíñ-õü]{1,63}$/iu'),
-        'AS'  => array(1 => '/^[\x{002d}0-9a-zà-öø-ÿāăąćĉċčďđēĕėęěĝğġģĥħĩīĭįıĵķĸĺļľłńņňŋōŏőœŕŗřśŝşšţťŧũūŭůűųŵŷźż]{1,63}$/iu'),
-        'AT'  => array(1 => '/^[\x{002d}0-9a-zà-öø-ÿœšž]{1,63}$/iu'),
-        'BIZ' => 'Zend/Validate/Hostname/Biz.php',
-        'BR'  => array(1 => '/^[\x{002d}0-9a-zà-ãçéíó-õúü]{1,63}$/iu'),
-        'BV'  => array(1 => '/^[\x{002d}0-9a-zàáä-éêñ-ôöøüčđńŋšŧž]{1,63}$/iu'),
-        'CA'  => array(1 => '/^[\x{002d}0-9a-zàâæçéèêëîïôœùûüÿ\x{00E0}\x{00E2}\x{00E7}\x{00E8}\x{00E9}\x{00EA}\x{00EB}\x{00EE}\x{00EF}\x{00F4}\x{00F9}\x{00FB}\x{00FC}\x{00E6}\x{0153}\x{00FF}]{1,63}$/iu'),
-        'CAT' => array(1 => '/^[\x{002d}0-9a-z·àç-éíïòóúü]{1,63}$/iu'),
-        'CH'  => array(1 => '/^[\x{002d}0-9a-zà-öø-ÿœ]{1,63}$/iu'),
-        'CL'  => array(1 => '/^[\x{002d}0-9a-záéíñóúü]{1,63}$/iu'),
-        'CN'  => 'Zend/Validate/Hostname/Cn.php',
-        'COM' => 'Zend/Validate/Hostname/Com.php',
-        'DE'  => array(1 => '/^[\x{002d}0-9a-zà-öø-ÿăąāćĉčċďđĕěėęēğĝġģĥħĭĩįīıĵķĺľļłńňņŋŏőōœĸŕřŗśŝšşťţŧŭůűũųūŵŷźžż]{1,63}$/iu'),
-        'DK'  => array(1 => '/^[\x{002d}0-9a-zäéöüæøå]{1,63}$/iu'),
-        'ES'  => array(1 => '/^[\x{002d}0-9a-zàáçèéíïñòóúü·]{1,63}$/iu'),
-        'EU'  => array(1 => '/^[\x{002d}0-9a-zà-öø-ÿ]{1,63}$/iu',
-            2 => '/^[\x{002d}0-9a-zāăąćĉċčďđēĕėęěĝğġģĥħĩīĭįıĵķĺļľŀłńņňŉŋōŏőœŕŗřśŝšťŧũūŭůűųŵŷźżž]{1,63}$/iu',
-            3 => '/^[\x{002d}0-9a-zșț]{1,63}$/iu',
-            4 => '/^[\x{002d}0-9a-zΐάέήίΰαβγδεζηθικλμνξοπρςστυφχψωϊϋόύώ]{1,63}$/iu',
-            5 => '/^[\x{002d}0-9a-zабвгдежзийклмнопрстуфхцчшщъыьэюя]{1,63}$/iu',
-            6 => '/^[\x{002d}0-9a-zἀ-ἇἐ-ἕἠ-ἧἰ-ἷὀ-ὅὐ-ὗὠ-ὧὰ-ώᾀ-ᾇᾐ-ᾗᾠ-ᾧᾰ-ᾴᾶᾷῂῃῄῆῇῐ-ΐῖῗῠ-ῧῲῳῴῶῷ]{1,63}$/iu'),
-        'FI'  => array(1 => '/^[\x{002d}0-9a-zäåö]{1,63}$/iu'),
-        'GR'  => array(1 => '/^[\x{002d}0-9a-zΆΈΉΊΌΎ-ΡΣ-ώἀ-ἕἘ-Ἕἠ-ὅὈ-Ὅὐ-ὗὙὛὝὟ-ώᾀ-ᾴᾶ-ᾼῂῃῄῆ-ῌῐ-ΐῖ-Ίῠ-Ῥῲῳῴῶ-ῼ]{1,63}$/iu'),
-        'HK'  => 'Zend/Validate/Hostname/Cn.php',
-        'HU'  => array(1 => '/^[\x{002d}0-9a-záéíóöúüőű]{1,63}$/iu'),
-        'INFO'=> array(1 => '/^[\x{002d}0-9a-zäåæéöøü]{1,63}$/iu',
-            2 => '/^[\x{002d}0-9a-záéíóöúüőű]{1,63}$/iu',
-            3 => '/^[\x{002d}0-9a-záæéíðóöúýþ]{1,63}$/iu',
-            4 => '/^[\x{AC00}-\x{D7A3}]{1,17}$/iu',
-            5 => '/^[\x{002d}0-9a-zāčēģīķļņōŗšūž]{1,63}$/iu',
-            6 => '/^[\x{002d}0-9a-ząčėęįšūųž]{1,63}$/iu',
-            7 => '/^[\x{002d}0-9a-zóąćęłńśźż]{1,63}$/iu',
-            8 => '/^[\x{002d}0-9a-záéíñóúü]{1,63}$/iu'),
-        'IO'  => array(1 => '/^[\x{002d}0-9a-zà-öø-ÿăąāćĉčċďđĕěėęēğĝġģĥħĭĩįīıĵķĺľļłńňņŋŏőōœĸŕřŗśŝšşťţŧŭůűũųūŵŷźžż]{1,63}$/iu'),
-        'IS'  => array(1 => '/^[\x{002d}0-9a-záéýúíóþæöð]{1,63}$/iu'),
-        'JP'  => 'Zend/Validate/Hostname/Jp.php',
-        'KR'  => array(1 => '/^[\x{AC00}-\x{D7A3}]{1,17}$/iu'),
-        'LI'  => array(1 => '/^[\x{002d}0-9a-zà-öø-ÿœ]{1,63}$/iu'),
-        'LT'  => array(1 => '/^[\x{002d}0-9ąčęėįšųūž]{1,63}$/iu'),
-        'MD'  => array(1 => '/^[\x{002d}0-9ăâîşţ]{1,63}$/iu'),
-        'MUSEUM' => array(1 => '/^[\x{002d}0-9a-zà-öø-ÿāăąćċčďđēėęěğġģħīįıķĺļľłńņňŋōőœŕŗřśşšţťŧūůűųŵŷźżžǎǐǒǔ\x{01E5}\x{01E7}\x{01E9}\x{01EF}ə\x{0292}ẁẃẅỳ]{1,63}$/iu'),
-        'NET' => 'Zend/Validate/Hostname/Com.php',
-        'NO'  => array(1 => '/^[\x{002d}0-9a-zàáä-éêñ-ôöøüčđńŋšŧž]{1,63}$/iu'),
-        'NU'  => 'Zend/Validate/Hostname/Com.php',
-        'ORG' => array(1 => '/^[\x{002d}0-9a-záéíñóúü]{1,63}$/iu',
-            2 => '/^[\x{002d}0-9a-zóąćęłńśźż]{1,63}$/iu',
-            3 => '/^[\x{002d}0-9a-záäåæéëíðóöøúüýþ]{1,63}$/iu',
-            4 => '/^[\x{002d}0-9a-záéíóöúüőű]{1,63}$/iu',
-            5 => '/^[\x{002d}0-9a-ząčėęįšūųž]{1,63}$/iu',
-            6 => '/^[\x{AC00}-\x{D7A3}]{1,17}$/iu',
-            7 => '/^[\x{002d}0-9a-zāčēģīķļņōŗšūž]{1,63}$/iu'),
-        'PE'  => array(1 => '/^[\x{002d}0-9a-zñáéíóúü]{1,63}$/iu'),
-        'PL'  => array(1 => '/^[\x{002d}0-9a-zāčēģīķļņōŗšūž]{1,63}$/iu',
-            2 => '/^[\x{002d}а-ик-ш\x{0450}ѓѕјљњќџ]{1,63}$/iu',
-            3 => '/^[\x{002d}0-9a-zâîăşţ]{1,63}$/iu',
-            4 => '/^[\x{002d}0-9а-яё\x{04C2}]{1,63}$/iu',
-            5 => '/^[\x{002d}0-9a-zàáâèéêìíîòóôùúûċġħż]{1,63}$/iu',
-            6 => '/^[\x{002d}0-9a-zàäåæéêòóôöøü]{1,63}$/iu',
-            7 => '/^[\x{002d}0-9a-zóąćęłńśźż]{1,63}$/iu',
-            8 => '/^[\x{002d}0-9a-zàáâãçéêíòóôõúü]{1,63}$/iu',
-            9 => '/^[\x{002d}0-9a-zâîăşţ]{1,63}$/iu',
-            10=> '/^[\x{002d}0-9a-záäéíóôúýčďĺľňŕšťž]{1,63}$/iu',
-            11=> '/^[\x{002d}0-9a-zçë]{1,63}$/iu',
-            12=> '/^[\x{002d}0-9а-ик-шђјљњћџ]{1,63}$/iu',
-            13=> '/^[\x{002d}0-9a-zćčđšž]{1,63}$/iu',
-            14=> '/^[\x{002d}0-9a-zâçöûüğış]{1,63}$/iu',
-            15=> '/^[\x{002d}0-9a-záéíñóúü]{1,63}$/iu',
-            16=> '/^[\x{002d}0-9a-zäõöüšž]{1,63}$/iu',
-            17=> '/^[\x{002d}0-9a-zĉĝĥĵŝŭ]{1,63}$/iu',
-            18=> '/^[\x{002d}0-9a-zâäéëîô]{1,63}$/iu',
-            19=> '/^[\x{002d}0-9a-zàáâäåæçèéêëìíîïðñòôöøùúûüýćčłńřśš]{1,63}$/iu',
-            20=> '/^[\x{002d}0-9a-zäåæõöøüšž]{1,63}$/iu',
-            21=> '/^[\x{002d}0-9a-zàáçèéìíòóùú]{1,63}$/iu',
-            22=> '/^[\x{002d}0-9a-zàáéíóöúüőű]{1,63}$/iu',
-            23=> '/^[\x{002d}0-9ΐά-ώ]{1,63}$/iu',
-            24=> '/^[\x{002d}0-9a-zàáâåæçèéêëðóôöøüþœ]{1,63}$/iu',
-            25=> '/^[\x{002d}0-9a-záäéíóöúüýčďěňřšťůž]{1,63}$/iu',
-            26=> '/^[\x{002d}0-9a-z·àçèéíïòóúü]{1,63}$/iu',
-            27=> '/^[\x{002d}0-9а-ъьюя\x{0450}\x{045D}]{1,63}$/iu',
-            28=> '/^[\x{002d}0-9а-яёіў]{1,63}$/iu',
-            29=> '/^[\x{002d}0-9a-ząčėęįšūųž]{1,63}$/iu',
-            30=> '/^[\x{002d}0-9a-záäåæéëíðóöøúüýþ]{1,63}$/iu',
-            31=> '/^[\x{002d}0-9a-zàâæçèéêëîïñôùûüÿœ]{1,63}$/iu',
-            32=> '/^[\x{002d}0-9а-щъыьэюяёєіїґ]{1,63}$/iu',
-            33=> '/^[\x{002d}0-9א-ת]{1,63}$/iu'),
-        'PR'  => array(1 => '/^[\x{002d}0-9a-záéíóúñäëïüöâêîôûàèùæçœãõ]{1,63}$/iu'),
-        'PT'  => array(1 => '/^[\x{002d}0-9a-záàâãçéêíóôõú]{1,63}$/iu'),
-        'RS'  => array(1 => '/^[\x{002D}\x{0030}-\x{0039}\x{0061}-\x{007A}\x{0107}\x{010D}\x{0111}\x{0161}\x{017E}]{1,63}$/iu)'),
-        'RU'  => array(1 => '/^[\x{002d}0-9а-яё]{1,63}$/iu'),
-        'SA'  => array(1 => '/^[\x{002d}.0-9\x{0621}-\x{063A}\x{0641}-\x{064A}\x{0660}-\x{0669}]{1,63}$/iu'),
-        'SE'  => array(1 => '/^[\x{002d}0-9a-zäåéöü]{1,63}$/iu'),
-        'SH'  => array(1 => '/^[\x{002d}0-9a-zà-öø-ÿăąāćĉčċďđĕěėęēğĝġģĥħĭĩįīıĵķĺľļłńňņŋŏőōœĸŕřŗśŝšşťţŧŭůűũųūŵŷźžż]{1,63}$/iu'),
-        'SI'  => array(
-            1 => '/^[\x{002d}0-9a-zà-öø-ÿ]{1,63}$/iu',
-            2 => '/^[\x{002d}0-9a-zāăąćĉċčďđēĕėęěĝğġģĥħĩīĭįıĵķĺļľŀłńņňŉŋōŏőœŕŗřśŝšťŧũūŭůűųŵŷźżž]{1,63}$/iu',
-            3 => '/^[\x{002d}0-9a-zșț]{1,63}$/iu'),
-        'SJ'  => array(1 => '/^[\x{002d}0-9a-zàáä-éêñ-ôöøüčđńŋšŧž]{1,63}$/iu'),
-        'TH'  => array(1 => '/^[\x{002d}0-9a-z\x{0E01}-\x{0E3A}\x{0E40}-\x{0E4D}\x{0E50}-\x{0E59}]{1,63}$/iu'),
-        'TM'  => array(1 => '/^[\x{002d}0-9a-zà-öø-ÿāăąćĉċčďđēėęěĝġģĥħīįĵķĺļľŀłńņňŋőœŕŗřśŝşšţťŧūŭůűųŵŷźżž]{1,63}$/iu'),
-        'TW'  => 'Zend/Validate/Hostname/Cn.php',
-        'TR'  => array(1 => '/^[\x{002d}0-9a-zğıüşöç]{1,63}$/iu'),
-        'UA'  => array(1 => '/^[\x{002d}0-9a-zабвгдежзийклмнопрстуфхцчшщъыьэюяѐёђѓєѕіїјљњћќѝўџґӂʼ]{1,63}$/iu'),
-        'VE'  => array(1 => '/^[\x{002d}0-9a-záéíóúüñ]{1,63}$/iu'),
-        'VN'  => array(1 => '/^[ÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚÝàáâãèéêìíòóôõùúýĂăĐđĨĩŨũƠơƯư\x{1EA0}-\x{1EF9}]{1,63}$/iu'),
-        'ایران' => array(1 => '/^[\x{0621}-\x{0624}\x{0626}-\x{063A}\x{0641}\x{0642}\x{0644}-\x{0648}\x{067E}\x{0686}\x{0698}\x{06A9}\x{06AF}\x{06CC}\x{06F0}-\x{06F9}]{1,30}$/iu'),
-        '中国' => 'Zend/Validate/Hostname/Cn.php',
-        '公司' => 'Zend/Validate/Hostname/Cn.php',
-        '网络' => 'Zend/Validate/Hostname/Cn.php'
-    );
-
-    protected $_idnLength = array(
-        'BIZ' => array(5 => 17, 11 => 15, 12 => 20),
-        'CN'  => array(1 => 20),
-        'COM' => array(3 => 17, 5 => 20),
-        'HK'  => array(1 => 15),
-        'INFO'=> array(4 => 17),
-        'KR'  => array(1 => 17),
-        'NET' => array(3 => 17, 5 => 20),
-        'ORG' => array(6 => 17),
-        'TW'  => array(1 => 20),
-        'ایران' => array(1 => 30),
-        '中国' => array(1 => 20),
-        '公司' => array(1 => 20),
-        '网络' => array(1 => 20),
-    );
-
-    protected $_options = array(
-        'allow' => self::ALLOW_DNS,
-        'idn'   => true,
-        'tld'   => true,
-        'ip'    => null
-    );
 
     /**
      * Sets validator options
@@ -889,77 +178,16 @@ class Zend_Validate_Hostname extends Zend_Validate_Abstract
      * @return void
      * @see http://www.iana.org/cctld/specifications-policies-cctlds-01apr02.htm  Technical Specifications for ccTLDs
      */
-    public function __construct($options = array())
+    public function __construct($allow = self::ALLOW_DNS, $validateIdn = true, $validateTld = true, Zend_Validate_Ip $ipValidator = null)
     {
-        if ($options instanceof Zend_Config) {
-            $options = $options->toArray();
-        } else if (!is_array($options)) {
-            $options = func_get_args();
-            $temp['allow'] = array_shift($options);
-            if (!empty($options)) {
-                $temp['idn'] = array_shift($options);
-            }
+        // Set allow options
+        $this->setAllow($allow);
 
-            if (!empty($options)) {
-                $temp['tld'] = array_shift($options);
-            }
+        // Set validation options
+        $this->_validateIdn = $validateIdn;
+        $this->_validateTld = $validateTld;
 
-            if (!empty($options)) {
-                $temp['ip'] = array_shift($options);
-            }
-
-            $options = $temp;
-        }
-
-        $options += $this->_options;
-        $this->setOptions($options);
-    }
-
-    /**
-     * Returns all set options
-     *
-     * @return array
-     */
-    public function getOptions()
-    {
-        return $this->_options;
-    }
-
-    /**
-     * Sets the options for this validator
-     *
-     * @param array $options
-     * @return Zend_Validate_Hostname
-     */
-    public function setOptions($options)
-    {
-        if (array_key_exists('allow', $options)) {
-            $this->setAllow($options['allow']);
-        }
-
-        if (array_key_exists('idn', $options)) {
-            $this->setValidateIdn($options['idn']);
-        }
-
-        if (array_key_exists('tld', $options)) {
-            $this->setValidateTld($options['tld']);
-        }
-
-        if (array_key_exists('ip', $options)) {
-            $this->setIpValidator($options['ip']);
-        }
-
-        return $this;
-    }
-
-    /**
-     * Returns the set ip validator
-     *
-     * @return Zend_Validate_Ip
-     */
-    public function getIpValidator()
-    {
-        return $this->_options['ip'];
+        $this->setIpValidator($ipValidator);
     }
 
     /**
@@ -971,9 +199,7 @@ class Zend_Validate_Hostname extends Zend_Validate_Abstract
         if ($ipValidator === null) {
             $ipValidator = new Zend_Validate_Ip();
         }
-
-        $this->_options['ip'] = $ipValidator;
-        return $this;
+        $this->_ipValidator = $ipValidator;
     }
 
     /**
@@ -983,7 +209,7 @@ class Zend_Validate_Hostname extends Zend_Validate_Abstract
      */
     public function getAllow()
     {
-        return $this->_options['allow'];
+        return $this->_allow;
     }
 
     /**
@@ -994,18 +220,8 @@ class Zend_Validate_Hostname extends Zend_Validate_Abstract
      */
     public function setAllow($allow)
     {
-        $this->_options['allow'] = $allow;
+        $this->_allow = $allow;
         return $this;
-    }
-
-    /**
-     * Returns the set idn option
-     *
-     * @return boolean
-     */
-    public function getValidateIdn()
-    {
-        return $this->_options['idn'];
     }
 
     /**
@@ -1017,18 +233,7 @@ class Zend_Validate_Hostname extends Zend_Validate_Abstract
      */
     public function setValidateIdn ($allowed)
     {
-        $this->_options['idn'] = (bool) $allowed;
-        return $this;
-    }
-
-    /**
-     * Returns the set tld option
-     *
-     * @return boolean
-     */
-    public function getValidateTld()
-    {
-        return $this->_options['tld'];
+        $this->_validateIdn = (bool) $allowed;
     }
 
     /**
@@ -1040,9 +245,22 @@ class Zend_Validate_Hostname extends Zend_Validate_Abstract
      */
     public function setValidateTld ($allowed)
     {
-        $this->_options['tld'] = (bool) $allowed;
+        $this->_validateTld = (bool) $allowed;
+    }
+
+    /**
+     * Sets the check option
+     *
+     * @param  integer $check
+     * @return Zend_Validate_Hostname Provides a fluent interface
+     */
+    /*
+    public function setCheck($check)
+    {
+        $this->_check = $check;
         return $this;
     }
+     */
 
     /**
      * Defined by Zend_Validate_Interface
@@ -1055,70 +273,28 @@ class Zend_Validate_Hostname extends Zend_Validate_Abstract
      */
     public function isValid($value)
     {
-        if (!is_string($value)) {
-            $this->_error(self::INVALID);
-            return false;
-        }
+        $valueString = (string) $value;
 
-        $this->_setValue($value);
+        $this->_setValue($valueString);
+
         // Check input against IP address schema
-        if (preg_match('/^[0-9a-f:.]*$/i', $value) &&
-            $this->_options['ip']->setTranslator($this->getTranslator())->isValid($value)) {
-            if (!($this->_options['allow'] & self::ALLOW_IP)) {
+        if ($this->_ipValidator->setTranslator($this->getTranslator())->isValid($valueString)) {
+            if (!($this->_allow & self::ALLOW_IP)) {
                 $this->_error(self::IP_ADDRESS_NOT_ALLOWED);
                 return false;
-            } else {
+            } else{
                 return true;
             }
         }
 
-        // RFC3986 3.2.2 states:
-        //
-        //     The rightmost domain label of a fully qualified domain name
-        //     in DNS may be followed by a single "." and should be if it is
-        //     necessary to distinguish between the complete domain name and
-        //     some local domain.
-        //
-        // (see ZF-6363)
-
-        // Local hostnames are allowed to be partitial (ending '.')
-        if ($this->_options['allow'] & self::ALLOW_LOCAL) {
-            if (substr($value, -1) === '.') {
-                $value = substr($value, 0, -1);
-                if (substr($value, -1) === '.') {
-                    // Empty hostnames (ending '..') are not allowed
-                    $this->_error(self::INVALID_LOCAL_NAME);
-                    return false;
-                }
-            }
-        }
-
-        $domainParts = explode('.', $value);
-
-        // Prevent partitial IP V4 adresses (ending '.')
-        if ((count($domainParts) == 4) && preg_match('/^[0-9.a-e:.]*$/i', $value) &&
-            $this->_options['ip']->setTranslator($this->getTranslator())->isValid($value)) {
-            $this->_error(self::INVALID_LOCAL_NAME);
-        }
-
         // Check input against DNS hostname schema
-        if ((count($domainParts) > 1) && (strlen($value) >= 4) && (strlen($value) <= 254)) {
+        $domainParts = explode('.', $valueString);
+        if ((count($domainParts) > 1) && (strlen($valueString) >= 4) && (strlen($valueString) <= 254)) {
             $status = false;
 
-            $origenc = PHP_VERSION_ID < 50600
-                        ? iconv_get_encoding('internal_encoding')
-                        : ini_get('default_charset');
-            if (PHP_VERSION_ID < 50600) {
-                iconv_set_encoding('internal_encoding', 'UTF-8');
-            } else {
-                ini_set('default_charset', 'UTF-8');
-            }
             do {
                 // First check TLD
-                $matches = array();
-                if (preg_match('/([^.]{2,10})$/i', end($domainParts), $matches) ||
-                    (end($domainParts) == 'ایران') || (end($domainParts) == '中国') ||
-                    (end($domainParts) == '公司') || (end($domainParts) == '网络')) {
+                if (preg_match('/([a-z]{2,10})$/i', end($domainParts), $matches)) {
 
                     reset($domainParts);
 
@@ -1129,7 +305,7 @@ class Zend_Validate_Hostname extends Zend_Validate_Abstract
 
                     // Match TLD against known list
                     $this->_tld = strtolower($matches[1]);
-                    if ($this->_options['tld']) {
+                    if ($this->_validateTld) {
                         if (!in_array($this->_tld, $this->_validTlds)) {
                             $this->_error(self::UNKNOWN_TLD);
                             $status = false;
@@ -1139,68 +315,62 @@ class Zend_Validate_Hostname extends Zend_Validate_Abstract
 
                     /**
                      * Match against IDN hostnames
-                     * Note: Keep label regex short to avoid issues with long patterns when matching IDN hostnames
                      * @see Zend_Validate_Hostname_Interface
                      */
-                    $regexChars = array(0 => '/^[a-z0-9\x2d]{1,63}$/i');
-                    if ($this->_options['idn'] &&  isset($this->_validIdns[strtoupper($this->_tld)])) {
-                        if (is_string($this->_validIdns[strtoupper($this->_tld)])) {
-                            $regexChars += include($this->_validIdns[strtoupper($this->_tld)]);
-                        } else {
-                            $regexChars += $this->_validIdns[strtoupper($this->_tld)];
+                    $labelChars = 'a-z0-9';
+                    $utf8 = false;
+                    $classFile = 'Zend/Validate/Hostname/' . ucfirst($this->_tld) . '.php';
+                    if ($this->_validateIdn) {
+                        if (Zend_Loader::isReadable($classFile)) {
+
+                            // Load additional characters
+                            $className = 'Zend_Validate_Hostname_' . ucfirst($this->_tld);
+                            #Zend_Loader::loadClass($className);
+                            $labelChars .= call_user_func(array($className, 'getCharacters'));
+                            $utf8 = true;
                         }
                     }
 
+                    // Keep label regex short to avoid issues with long patterns when matching IDN hostnames
+                    $regexLabel = '/^[' . $labelChars . '\x2d]{1,63}$/i';
+                    if ($utf8) {
+                        $regexLabel .= 'u';
+                    }
+
                     // Check each hostname part
-                    $check = 0;
+                    $valid = true;
                     foreach ($domainParts as $domainPart) {
-                        // Decode Punycode domainnames to IDN
-                        if (strpos($domainPart, 'xn--') === 0) {
-                            $domainPart = $this->decodePunycode(substr($domainPart, 4));
-                            if ($domainPart === false) {
-                                return false;
-                            }
-                        }
 
                         // Check dash (-) does not start, end or appear in 3rd and 4th positions
-                        if ((strpos($domainPart, '-') === 0)
-                            || ((strlen($domainPart) > 2) && (strpos($domainPart, '-', 2) == 2) && (strpos($domainPart, '-', 3) == 3))
-                            || (strpos($domainPart, '-') === (strlen($domainPart) - 1))) {
-                                $this->_error(self::INVALID_DASH);
+                        if (strpos($domainPart, '-') === 0 ||
+                        (strlen($domainPart) > 2 && strpos($domainPart, '-', 2) == 2 && strpos($domainPart, '-', 3) == 3) ||
+                        strrpos($domainPart, '-') === strlen($domainPart) - 1) {
+
+                            $this->_error(self::INVALID_DASH);
                             $status = false;
                             break 2;
                         }
 
                         // Check each domain part
-                        $checked = false;
-                        foreach($regexChars as $regexKey => $regexChar) {
-                            $status = @preg_match($regexChar, $domainPart);
-                            if ($status > 0) {
-                                $length = 63;
-                                if (array_key_exists(strtoupper($this->_tld), $this->_idnLength)
-                                    && (array_key_exists($regexKey, $this->_idnLength[strtoupper($this->_tld)]))) {
-                                    $length = $this->_idnLength[strtoupper($this->_tld)];
-                                }
-
-                                if (iconv_strlen($domainPart, 'UTF-8') > $length) {
-                                    $this->_error(self::INVALID_HOSTNAME);
-                                } else {
-                                    $checked = true;
-                                    break;
-                                }
-                            }
-                        }
-
-                        if ($checked) {
-                            ++$check;
+                        $status = @preg_match($regexLabel, $domainPart);
+                        if ($status === false) {
+                            /**
+                             * Regex error
+                             * @see Zend_Validate_Exception
+                             */
+                            #require_once 'Zend/Validate/Exception.php';
+                            throw new Zend_Validate_Exception('Internal error: DNS validation failed');
+                        } elseif ($status === 0) {
+                            $valid = false;
                         }
                     }
 
-                    // If one of the labels doesn't match, the hostname is invalid
-                    if ($check !== count($domainParts)) {
+                    // If all labels didn't match, the hostname is invalid
+                    if (!$valid) {
                         $this->_error(self::INVALID_HOSTNAME_SCHEMA);
                         $status = false;
                     }
+
                 } else {
                     // Hostname not long enough
                     $this->_error(self::UNDECIPHERABLE_TLD);
@@ -1208,36 +378,30 @@ class Zend_Validate_Hostname extends Zend_Validate_Abstract
                 }
             } while (false);
 
-            if (PHP_VERSION_ID < 50600) {
-                iconv_set_encoding('internal_encoding', $origenc);
-            } else {
-                ini_set('default_charset', $origenc);
-            }
             // If the input passes as an Internet domain name, and domain names are allowed, then the hostname
             // passes validation
-            if ($status && ($this->_options['allow'] & self::ALLOW_DNS)) {
+            if ($status && ($this->_allow & self::ALLOW_DNS)) {
                 return true;
             }
-        } else if ($this->_options['allow'] & self::ALLOW_DNS) {
+        } else {
             $this->_error(self::INVALID_HOSTNAME);
         }
 
-        // Check for URI Syntax (RFC3986)
-        if ($this->_options['allow'] & self::ALLOW_URI) {
-            if (preg_match("/^([a-zA-Z0-9-._~!$&\'()*+,;=]|%[[:xdigit:]]{2}){1,254}$/i", $value)) {
-                return true;
-            } else {
-                $this->_error(self::INVALID_URI);
-            }
-        }
-
         // Check input against local network name schema; last chance to pass validation
-        $regexLocal = '/^(([a-zA-Z0-9\x2d]{1,63}\x2e)*[a-zA-Z0-9\x2d]{1,63}[\x2e]{0,1}){1,254}$/';
-        $status = @preg_match($regexLocal, $value);
+        $regexLocal = '/^(([a-zA-Z0-9\x2d]{1,63}\x2e)*[a-zA-Z0-9\x2d]{1,63}){1,254}$/';
+        $status = @preg_match($regexLocal, $valueString);
+        if (false === $status) {
+            /**
+             * Regex error
+             * @see Zend_Validate_Exception
+             */
+            #require_once 'Zend/Validate/Exception.php';
+            throw new Zend_Validate_Exception('Internal error: local network name validation failed');
+        }
 
         // If the input passes as a local network name, and local network names are allowed, then the
         // hostname passes validation
-        $allowLocal = $this->_options['allow'] & self::ALLOW_LOCAL;
+        $allowLocal = $this->_allow & self::ALLOW_LOCAL;
         if ($status && $allowLocal) {
             return true;
         }
@@ -1256,99 +420,22 @@ class Zend_Validate_Hostname extends Zend_Validate_Abstract
     }
 
     /**
-     * Decodes a punycode encoded string to it's original utf8 string
-     * In case of a decoding failure the original string is returned
+     * Throws an exception if a regex for $type does not exist
      *
-     * @param  string $encoded Punycode encoded string to decode
-     * @return string
+     * @param  string $type
+     * @throws Zend_Validate_Exception
+     * @return Zend_Validate_Hostname Provides a fluent interface
      */
-    protected function decodePunycode($encoded)
+    /*
+    protected function _checkRegexType($type)
     {
-        $found = preg_match('/([^a-z0-9\x2d]{1,10})$/i', $encoded);
-        if (empty($encoded) || ($found > 0)) {
-            // no punycode encoded string, return as is
-            $this->_error(self::CANNOT_DECODE_PUNYCODE);
-            return false;
+        if (!isset($this->_regex[$type])) {
+            #require_once 'Zend/Validate/Exception.php';
+            throw new Zend_Validate_Exception("'$type' must be one of ('" . implode(', ', array_keys($this->_regex))
+                                            . "')");
         }
-
-        $separator = strrpos($encoded, '-');
-        if ($separator > 0) {
-            for ($x = 0; $x < $separator; ++$x) {
-                // prepare decoding matrix
-                $decoded[] = ord($encoded[$x]);
-            }
-        } else {
-            $this->_error(self::CANNOT_DECODE_PUNYCODE);
-            return false;
-        }
-
-        $lengthd = count($decoded);
-        $lengthe = strlen($encoded);
-
-        // decoding
-        $init  = true;
-        $base  = 72;
-        $index = 0;
-        $char  = 0x80;
-
-        for ($indexe = ($separator) ? ($separator + 1) : 0; $indexe < $lengthe; ++$lengthd) {
-            for ($old_index = $index, $pos = 1, $key = 36; 1 ; $key += 36) {
-                $hex   = ord($encoded[$indexe++]);
-                $digit = ($hex - 48 < 10) ? $hex - 22
-                       : (($hex - 65 < 26) ? $hex - 65
-                       : (($hex - 97 < 26) ? $hex - 97
-                       : 36));
-
-                $index += $digit * $pos;
-                $tag    = ($key <= $base) ? 1 : (($key >= $base + 26) ? 26 : ($key - $base));
-                if ($digit < $tag) {
-                    break;
-                }
-
-                $pos = (int) ($pos * (36 - $tag));
-            }
-
-            $delta   = intval($init ? (($index - $old_index) / 700) : (($index - $old_index) / 2));
-            $delta  += intval($delta / ($lengthd + 1));
-            for ($key = 0; $delta > 910 / 2; $key += 36) {
-                $delta = intval($delta / 35);
-            }
-
-            $base   = intval($key + 36 * $delta / ($delta + 38));
-            $init   = false;
-            $char  += (int) ($index / ($lengthd + 1));
-            $index %= ($lengthd + 1);
-            if ($lengthd > 0) {
-                for ($i = $lengthd; $i > $index; $i--) {
-                    $decoded[$i] = $decoded[($i - 1)];
-                }
-            }
-
-            $decoded[$index++] = $char;
-        }
-
-        // convert decoded ucs4 to utf8 string
-        foreach ($decoded as $key => $value) {
-            if ($value < 128) {
-                $decoded[$key] = chr($value);
-            } elseif ($value < (1 << 11)) {
-                $decoded[$key]  = chr(192 + ($value >> 6));
-                $decoded[$key] .= chr(128 + ($value & 63));
-            } elseif ($value < (1 << 16)) {
-                $decoded[$key]  = chr(224 + ($value >> 12));
-                $decoded[$key] .= chr(128 + (($value >> 6) & 63));
-                $decoded[$key] .= chr(128 + ($value & 63));
-            } elseif ($value < (1 << 21)) {
-                $decoded[$key]  = chr(240 + ($value >> 18));
-                $decoded[$key] .= chr(128 + (($value >> 12) & 63));
-                $decoded[$key] .= chr(128 + (($value >> 6) & 63));
-                $decoded[$key] .= chr(128 + ($value & 63));
-            } else {
-                $this->_error(self::CANNOT_DECODE_PUNYCODE);
-                return false;
-            }
-        }
-
-        return implode($decoded);
+        return $this;
     }
+     */
+
 }

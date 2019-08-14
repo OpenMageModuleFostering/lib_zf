@@ -16,9 +16,8 @@
  * @category   Zend
  * @package    Zend_Gdata
  * @subpackage App
- * @copyright  Copyright (c) 2005-2014 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id$
  */
 
 /**
@@ -26,16 +25,13 @@
  */
 #require_once 'Zend/Gdata/App/Util.php';
 
-/** @see Zend_Xml_Security */
-#require_once 'Zend/Xml/Security.php';
-
 /**
  * Abstract class for all XML elements
  *
  * @category   Zend
  * @package    Zend_Gdata
  * @subpackage App
- * @copyright  Copyright (c) 2005-2014 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 abstract class Zend_Gdata_App_Base
@@ -71,14 +67,6 @@ abstract class Zend_Gdata_App_Base
      * @var string XML child text node content
      */
     protected $_text = null;
-
-    /**
-     * @var array Memoized results from calls to lookupNamespace() to avoid
-     *      expensive calls to getGreatestBoundedValue(). The key is in the
-     *      form 'prefix-majorVersion-minorVersion', and the value is the
-     *      output from getGreatestBoundedValue().
-     */
-    protected static $_namespaceLookupCache = array();
 
     /**
      * List of namespaces, as a three-dimensional array. The first dimension
@@ -209,7 +197,7 @@ abstract class Zend_Gdata_App_Base
      */
     public function getDOM($doc = null, $majorVersion = 1, $minorVersion = null)
     {
-        if ($doc === null) {
+        if (is_null($doc)) {
             $doc = new DOMDocument('1.0', 'utf-8');
         }
         if ($this->_rootNamespaceURI != null) {
@@ -304,9 +292,9 @@ abstract class Zend_Gdata_App_Base
             // Load the feed as an XML DOMDocument object
             @ini_set('track_errors', 1);
             $doc = new DOMDocument();
-            $doc = @Zend_Xml_Security::scan($xml, $doc);
+            $success = @$doc->loadXML($xml);
             @ini_restore('track_errors');
-            if (!$doc) {
+            if (!$success) {
                 #require_once 'Zend/Gdata/App/Exception.php';
                 throw new Zend_Gdata_App_Exception("DOMDocument cannot parse XML: $php_errormsg");
             }
@@ -376,12 +364,6 @@ abstract class Zend_Gdata_App_Base
                                     $majorVersion = 1,
                                     $minorVersion = null)
     {
-        // Check for a memoized result
-        $key = $prefix . ' ' .
-               ($majorVersion === null ? 'NULL' : $majorVersion) .
-               ' '. ($minorVersion === null ? 'NULL' : $minorVersion);
-        if (array_key_exists($key, self::$_namespaceLookupCache))
-          return self::$_namespaceLookupCache[$key];
         // If no match, return the prefix by default
         $result = $prefix;
 
@@ -399,9 +381,6 @@ abstract class Zend_Gdata_App_Base
             $result = $nsData[$foundMinorV];
         }
 
-        // Memoize result
-        self::$_namespaceLookupCache[$key] = $result;
-
         return $result;
     }
 
@@ -411,12 +390,6 @@ abstract class Zend_Gdata_App_Base
      * Takes a prefix and a full namespace URI and adds them to the
      * list of registered namespaces for use by
      * $this->lookupNamespace().
-     *
-     * WARNING: Currently, registering a namespace will NOT invalidate any
-     *          memoized data stored in $_namespaceLookupCache. Under normal
-     *          use, this behavior is acceptable. If you are adding
-     *          contradictory data to the namespace lookup table, you must
-     *          call flushNamespaceLookupCache().
      *
      * @param  string $prefix The namespace prefix
      * @param  string $namespaceUri The full namespace URI
@@ -432,19 +405,7 @@ abstract class Zend_Gdata_App_Base
                                       $minorVersion = 0)
     {
         $this->_namespaces[$prefix][$majorVersion][$minorVersion] =
-        $namespaceUri;
-    }
-
-    /**
-     * Flush namespace lookup cache.
-     *
-     * Empties the namespace lookup cache. Call this function if you have
-     * added data to the namespace lookup table that contradicts values that
-     * may have been cached during a previous call to lookupNamespace().
-     */
-    public static function flushNamespaceLookupCache()
-    {
-        self::$_namespaceLookupCache = array();
+            $namespaceUri;
     }
 
     /**
@@ -506,7 +467,7 @@ abstract class Zend_Gdata_App_Base
         $method = 'set'.ucfirst($name);
         if (method_exists($this, $method)) {
             return call_user_func(array(&$this, $method), $val);
-        } else if (isset($this->{'_' . $name}) || ($this->{'_' . $name} === null)) {
+        } else if (isset($this->{'_' . $name}) || is_null($this->{'_' . $name})) {
             $this->{'_' . $name} = $val;
         } else {
             #require_once 'Zend/Gdata/App/InvalidArgumentException.php';
