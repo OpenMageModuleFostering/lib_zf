@@ -13,26 +13,24 @@
  * to license@zend.com so we can send you a copy immediately.
  *
  * @category   Zend
- * @package    Zend_InfoCard
- * @subpackage Zend_InfoCard_Cipher
- * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
+ * @package    Zend_Xml
+ * @copyright  Copyright (c) 2005-2014 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: Interface.php 24593 2012-01-05 20:35:02Z matthew $
+ * @version    $Id$
  */
 
+
 /**
- * Zend_InfoCard_Cipher_Symmetric_Aes256cbc_Interface
+ * @see Zend_Exception
  */
-#require_once 'Zend/InfoCard/Cipher/Symmetric/Aes256cbc/Interface.php';
+#require_once 'Zend/Exception.php';
+
 
 /**
  * @category   Zend
- * @package    Zend_InfoCard
- * @subpackage Zend_InfoCard_Cipher
- * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
+ * @package    Zend_Xml
+ * @copyright  Copyright (c) 2005-2014 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-interface Zend_InfoCard_Cipher_Symmetric_Aes128cbc_Interface
-    extends Zend_InfoCard_Cipher_Symmetric_Aes256cbc_Interface
-{
-}
+class Zend_Xml_Exception extends Zend_Exception
+{}
