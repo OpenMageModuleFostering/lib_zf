@@ -15,15 +15,16 @@
  * @category   Zend
  * @package    Zend_View
  * @subpackage Helper
- * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2010 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
+ * @version    $Id: FormPassword.php 20096 2010-01-06 02:05:09Z bkarwin $
  */
 
 
 /**
  * Abstract class for extension
  */
-require_once 'Zend/View/Helper/FormElement.php';
+#require_once 'Zend/View/Helper/FormElement.php';
 
 
 /**
@@ -32,7 +33,7 @@ require_once 'Zend/View/Helper/FormElement.php';
  * @category   Zend
  * @package    Zend_View
  * @subpackage Helper
- * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2010 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 class Zend_View_Helper_FormPassword extends Zend_View_Helper_FormElement
@@ -57,23 +58,33 @@ class Zend_View_Helper_FormPassword extends Zend_View_Helper_FormElement
         $info = $this->_getInfo($name, $value, $attribs);
         extract($info); // name, value, attribs, options, listsep, disable
 
-        // build the element
+        // is it disabled?
         $disabled = '';
         if ($disable) {
             // disabled
             $disabled = ' disabled="disabled"';
         }
-        
+
+        // determine the XHTML value
+        $valueString = ' value=""';
+        if (array_key_exists('renderPassword', $attribs)) {
+            if ($attribs['renderPassword']) {
+                $valueString = ' value="' . $this->view->escape($value) . '"';
+            }
+            unset($attribs['renderPassword']);
+        }
+
         // XHTML or HTML end tag?
         $endTag = ' />';
         if (($this->view instanceof Zend_View_Abstract) && !$this->view->doctype()->isXhtml()) {
             $endTag= '>';
         }
 
+        // render the element
         $xhtml = '<input type="password"'
                 . ' name="' . $this->view->escape($name) . '"'
                 . ' id="' . $this->view->escape($id) . '"'
-                . ' value=""'                             // don't render value of password!
+                . $valueString
                 . $disabled
                 . $this->_htmlAttribs($attribs)
                 . $endTag;

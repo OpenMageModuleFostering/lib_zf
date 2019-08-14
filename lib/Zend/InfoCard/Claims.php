@@ -14,16 +14,10 @@
  *
  * @category   Zend
  * @package    Zend_InfoCard
- * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2010 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: Claims.php 8064 2008-02-16 10:58:39Z thomas $
- * @author     John Coggeshall <john@zend.com>
+ * @version    $Id: Claims.php 20096 2010-01-06 02:05:09Z bkarwin $
  */
-
-/**
- * Zend_InfoCard_Exception
- */
-require_once 'Zend/InfoCard/Exception.php';
 
 /**
  * Result value of the InfoCard component, contains any error messages and claims
@@ -31,9 +25,8 @@ require_once 'Zend/InfoCard/Exception.php';
  *
  * @category   Zend
  * @package    Zend_InfoCard
- * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2010 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @author     John Coggeshall <john@zend.com>
  */
 class Zend_InfoCard_Claims
 {
@@ -120,13 +113,10 @@ class Zend_InfoCard_Claims
      */
     public function getDefaultNamespace()
     {
-
-        if(is_null($this->_defaultNamespace)) {
-
+        if($this->_defaultNamespace === null) {
             $namespaces = array();
             $leader = '';
             foreach($this->_claims as $claim) {
-
                 if(!isset($namespaces[$claim['namespace']])) {
                     $namespaces[$claim['namespace']] = 1;
                 } else {
@@ -139,6 +129,7 @@ class Zend_InfoCard_Claims
             }
 
             if(empty($leader)) {
+                #require_once 'Zend/InfoCard/Exception.php';
                 throw new Zend_InfoCard_Exception("Failed to determine default namespace");
             }
 
@@ -165,6 +156,7 @@ class Zend_InfoCard_Claims
             }
         }
 
+        #require_once 'Zend/InfoCard/Exception.php';
         throw new Zend_InfoCard_Exception("At least one claim must exist in specified namespace to make it the default namespace");
     }
 
@@ -211,7 +203,8 @@ class Zend_InfoCard_Claims
      */
     public function setClaims(Array $claims)
     {
-        if(!is_null($this->_claims)) {
+        if($this->_claims !== null) {
+            #require_once 'Zend/InfoCard/Exception.php';
             throw new Zend_InfoCard_Exception("Claim objects are read-only");
         }
 
@@ -236,6 +229,7 @@ class Zend_InfoCard_Claims
                 return $this;
         }
 
+        #require_once 'Zend/InfoCard/Exception.php';
         throw new Zend_InfoCard_Exception("Attempted to set unknown error code");
     }
 
@@ -281,6 +275,7 @@ class Zend_InfoCard_Claims
      */
     public function __unset($k)
     {
+        #require_once 'Zend/InfoCard/Exception.php';
         throw new Zend_InfoCard_Exception("Claim objects are read-only");
     }
 
@@ -306,6 +301,7 @@ class Zend_InfoCard_Claims
      */
     public function __set($k, $v)
     {
+        #require_once 'Zend/InfoCard/Exception.php';
         throw new Zend_InfoCard_Exception("Claim objects are read-only");
     }
 }

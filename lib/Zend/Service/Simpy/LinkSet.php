@@ -16,23 +16,23 @@
  * @category   Zend
  * @package    Zend_Service
  * @subpackage Simpy
- * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2010 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: LinkSet.php 8064 2008-02-16 10:58:39Z thomas $
+ * @version    $Id: LinkSet.php 20096 2010-01-06 02:05:09Z bkarwin $
  */
 
 
 /**
  * @see Zend_Service_Simpy_Link
  */
-require_once 'Zend/Service/Simpy/Link.php';
+#require_once 'Zend/Service/Simpy/Link.php';
 
 
 /**
  * @category   Zend
  * @package    Zend_Service
  * @subpackage Simpy
- * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2010 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 class Zend_Service_Simpy_LinkSet implements IteratorAggregate

@@ -15,14 +15,19 @@
  * @category   Zend
  * @package    Zend_Controller
  * @subpackage Zend_Controller_Action_Helper
- * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2010 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 
 /**
  * @see Zend_Session
  */
-require_once 'Zend/Session.php';
+#require_once 'Zend/Session.php';
+
+/**
+ * @see Zend_Controller_Action_Helper_Abstract
+ */
+#require_once 'Zend/Controller/Action/Helper/Abstract.php';
 
 /**
  * Flash Messenger - implement session-based messages
@@ -31,9 +36,9 @@ require_once 'Zend/Session.php';
  * @category   Zend
  * @package    Zend_Controller
  * @subpackage Zend_Controller_Action_Helper
- * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2010 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: $
+ * @version    $Id: FlashMessenger.php 20096 2010-01-06 02:05:09Z bkarwin $
  */
 class Zend_Controller_Action_Helper_FlashMessenger extends Zend_Controller_Action_Helper_Abstract implements IteratorAggregate, Countable
 {
@@ -216,10 +221,10 @@ class Zend_Controller_Action_Helper_FlashMessenger extends Zend_Controller_Actio
             unset(self::$_session->{$this->_namespace});
             return true;
         }
-        
+
         return false;
     }
-    
+
     /**
      * getIterator() - complete the IteratorAggregate interface, for iterating
      *
@@ -250,8 +255,8 @@ class Zend_Controller_Action_Helper_FlashMessenger extends Zend_Controller_Actio
 
     /**
      * Strategy pattern: proxy to addMessage()
-     * 
-     * @param  string $message 
+     *
+     * @param  string $message
      * @return void
      */
     public function direct($message)

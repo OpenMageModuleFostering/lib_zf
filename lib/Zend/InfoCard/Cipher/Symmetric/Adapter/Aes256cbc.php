@@ -15,26 +15,20 @@
  * @category   Zend
  * @package    Zend_InfoCard
  * @subpackage Zend_InfoCard_Cipher
- * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2010 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: Aes256cbc.php 8064 2008-02-16 10:58:39Z thomas $
- * @author     John Coggeshall <john@zend.com>
+ * @version    $Id: Aes256cbc.php 20096 2010-01-06 02:05:09Z bkarwin $
  */
 
 /**
  * Zend_InfoCard_Cipher_Symmetric_Adapter_Abstract
  */
-require_once 'Zend/InfoCard/Cipher/Symmetric/Adapter/Abstract.php';
+#require_once 'Zend/InfoCard/Cipher/Symmetric/Adapter/Abstract.php';
 
 /**
  * Zend_InfoCard_Cipher_Symmetric_Aes256cbc_Interface
  */
-require_once 'Zend/InfoCard/Cipher/Symmetric/Aes256cbc/Interface.php';
-
-/**
- * Zend_InfoCard_Cipher_Exception
- */
-require_once 'Zend/InfoCard/Cipher/Exception.php';
+#require_once 'Zend/InfoCard/Cipher/Symmetric/Aes256cbc/Interface.php';
 
 /**
  * Implements AES256 with CBC encryption implemented using the mCrypt extension
@@ -42,9 +36,8 @@ require_once 'Zend/InfoCard/Cipher/Exception.php';
  * @category   Zend
  * @package    Zend_InfoCard
  * @subpackage Zend_InfoCard_Cipher
- * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2010 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @author     John Coggeshall <john@zend.com>
  */
 class Zend_InfoCard_Cipher_Symmetric_Adapter_Aes256cbc
     extends Zend_InfoCard_Cipher_Symmetric_Adapter_Abstract
@@ -75,6 +68,7 @@ class Zend_InfoCard_Cipher_Symmetric_Adapter_Aes256cbc
         // Can't test for this
         // @codeCoverageIgnoreStart
         if(!extension_loaded('mcrypt')) {
+            #require_once 'Zend/InfoCard/Cipher/Exception.php';
             throw new Zend_InfoCard_Cipher_Exception("Use of the AES256CBC Cipher requires the mcrypt extension");
         }
         // @codeCoveregIgnoreEnd
@@ -92,7 +86,7 @@ class Zend_InfoCard_Cipher_Symmetric_Adapter_Aes256cbc
     public function decrypt($encryptedData, $decryptionKey, $iv_length = null)
     {
 
-        $iv_length = is_null($iv_length) ? self::IV_LENGTH : $iv_length;
+        $iv_length = ($iv_length === null) ? self::IV_LENGTH : $iv_length;
 
         $mcrypt_iv = null;
 
@@ -104,6 +98,7 @@ class Zend_InfoCard_Cipher_Symmetric_Adapter_Aes256cbc
         $decrypted = mcrypt_decrypt(self::MCRYPT_CIPHER, $decryptionKey, $encryptedData, self::MCRYPT_MODE, $mcrypt_iv);
 
         if(!$decrypted) {
+            #require_once 'Zend/InfoCard/Cipher/Exception.php';
             throw new Zend_InfoCard_Cipher_Exception("Failed to decrypt data using AES256CBC Algorithm");
         }
 

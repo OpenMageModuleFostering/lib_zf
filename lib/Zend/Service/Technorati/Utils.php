@@ -15,9 +15,9 @@
  * @category   Zend
  * @package    Zend_Service
  * @subpackage Technorati
- * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2010 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: Utils.php 8064 2008-02-16 10:58:39Z thomas $
+ * @version    $Id: Utils.php 20096 2010-01-06 02:05:09Z bkarwin $
  */
 
 
@@ -27,7 +27,7 @@
  * @category   Zend
  * @package    Zend_Service
  * @subpackage Technorati
- * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2010 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 class Zend_Service_Technorati_Utils
@@ -51,7 +51,7 @@ class Zend_Service_Technorati_Utils
         /**
          * @see Zend_Uri
          */
-        require_once 'Zend/Uri.php';
+        #require_once 'Zend/Uri.php';
         if ($input instanceof Zend_Uri_Http) {
             $uri = $input;
         } else {
@@ -63,8 +63,8 @@ class Zend_Service_Technorati_Utils
                 /**
                  * @see Zend_Service_Technorati_Exception
                  */
-                require_once 'Zend/Service/Technorati/Exception.php';
-                throw new Zend_Service_Technorati_Exception($e->getMessage());
+                #require_once 'Zend/Service/Technorati/Exception.php';
+                throw new Zend_Service_Technorati_Exception($e->getMessage(), 0, $e);
             }
         }
 
@@ -73,20 +73,20 @@ class Zend_Service_Technorati_Utils
             /**
              * @see Zend_Service_Technorati_Exception
              */
-            require_once 'Zend/Service/Technorati/Exception.php'; 
+            #require_once 'Zend/Service/Technorati/Exception.php';
             throw new Zend_Service_Technorati_Exception(
                 "Invalid URL $uri, only HTTP(S) protocols can be used");
         }
-        
+
         return $uri;
     }
     /**
      * Parses, validates and returns a valid Zend_Date object
      * from given $input.
-     * 
+     *
      * $input can be either a string, an integer or a Zend_Date object.
      * If $input is string or int, it will be provided to Zend_Date as it is.
-     * If $input is a Zend_Date object, the object instance will be returned. 
+     * If $input is a Zend_Date object, the object instance will be returned.
      *
      * @param   mixed|Zend_Date $input
      * @return  null|Zend_Date
@@ -98,17 +98,17 @@ class Zend_Service_Technorati_Utils
         /**
          * @see Zend_Date
          */
-        require_once 'Zend/Date.php';
+        #require_once 'Zend/Date.php';
         /**
          * @see Zend_Locale
          */
-        require_once 'Zend/Locale.php';
-        
+        #require_once 'Zend/Locale.php';
+
         // allow null as value and return valid Zend_Date objects
         if (($input === null) || ($input instanceof Zend_Date)) {
             return $input;
         }
-        
+
         // due to a BC break as of ZF 1.5 it's not safe to use Zend_Date::isDate() here
         // see ZF-2524, ZF-2334
         if (@strtotime($input) !== FALSE) {
@@ -117,11 +117,11 @@ class Zend_Service_Technorati_Utils
             /**
              * @see Zend_Service_Technorati_Exception
              */
-            require_once 'Zend/Service/Technorati/Exception.php';
+            #require_once 'Zend/Service/Technorati/Exception.php';
             throw new Zend_Service_Technorati_Exception("'$input' is not a valid Date/Time");
         }
     }
-    
+
     /**
      * @todo public static function xpathQueryAndSet() {}
      */

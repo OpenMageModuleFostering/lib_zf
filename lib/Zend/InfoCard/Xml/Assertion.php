@@ -15,21 +15,15 @@
  * @category   Zend
  * @package    Zend_InfoCard
  * @subpackage Zend_InfoCard_Xml
- * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2010 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: Assertion.php 8064 2008-02-16 10:58:39Z thomas $
- * @author     John Coggeshall <john@zend.com>
+ * @version    $Id: Assertion.php 20096 2010-01-06 02:05:09Z bkarwin $
  */
-
-/**
- * Zend_InfoCard_Xml_Exception
- */
-require_once 'Zend/InfoCard/Xml/Exception.php';
 
 /**
  * Zend_InfoCard_Xml_Assertion_Interface
  */
-require_once 'Zend/InfoCard/Xml/Assertion/Interface.php';
+#require_once 'Zend/InfoCard/Xml/Assertion/Interface.php';
 
 /**
  * Factory object to retrieve an Assertion object based on the type of XML document provided
@@ -37,9 +31,8 @@ require_once 'Zend/InfoCard/Xml/Assertion/Interface.php';
  * @category   Zend
  * @package    Zend_InfoCard
  * @subpackage Zend_InfoCard_Xml
- * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2010 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @author     John Coggeshall <john@zend.com>
  */
 final class Zend_InfoCard_Xml_Assertion
 {
@@ -73,6 +66,7 @@ final class Zend_InfoCard_Xml_Assertion
         } else if (is_string($xmlData)) {
             $strXmlData = $xmlData;
         } else {
+            #require_once 'Zend/InfoCard/Xml/Exception.php';
             throw new Zend_InfoCard_Xml_Exception("Invalid Data provided to create instance");
         }
 
@@ -88,6 +82,7 @@ final class Zend_InfoCard_Xml_Assertion
             }
         }
 
+        #require_once 'Zend/InfoCard/Xml/Exception.php';
         throw new Zend_InfoCard_Xml_Exception("Unable to determine Assertion type by Namespace");
     }
 }

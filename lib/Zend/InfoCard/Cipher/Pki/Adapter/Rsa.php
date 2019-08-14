@@ -15,21 +15,20 @@
  * @category   Zend
  * @package    Zend_InfoCard
  * @subpackage Zend_InfoCard_Cipher
- * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2010 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: Rsa.php 8064 2008-02-16 10:58:39Z thomas $
- * @author     John Coggeshall <john@zend.com>
+ * @version    $Id: Rsa.php 20096 2010-01-06 02:05:09Z bkarwin $
  */
 
 /**
  * Zend_InfoCard_Cipher_Pki_Adapter_Abstract
  */
-require_once 'Zend/InfoCard/Cipher/Pki/Adapter/Abstract.php';
+#require_once 'Zend/InfoCard/Cipher/Pki/Adapter/Abstract.php';
 
 /**
  * Zend_InfoCard_Cipher_Pki_Rsa_Interface
  */
-require_once 'Zend/InfoCard/Cipher/Pki/Rsa/Interface.php';
+#require_once 'Zend/InfoCard/Cipher/Pki/Rsa/Interface.php';
 
 /**
  * RSA Public Key Encryption Cipher Object for the InfoCard component. Relies on OpenSSL
@@ -38,9 +37,8 @@ require_once 'Zend/InfoCard/Cipher/Pki/Rsa/Interface.php';
  * @category   Zend
  * @package    Zend_InfoCard
  * @subpackage Zend_InfoCard_Cipher
- * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2010 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @author     John Coggeshall <john@zend.com>
  */
 class Zend_InfoCard_Cipher_Pki_Adapter_Rsa
     extends Zend_InfoCard_Cipher_Pki_Adapter_Abstract
@@ -57,6 +55,7 @@ class Zend_InfoCard_Cipher_Pki_Adapter_Rsa
         // Can't test this..
         // @codeCoverageIgnoreStart
         if(!extension_loaded('openssl')) {
+            #require_once 'Zend/InfoCard/Cipher/Exception.php';
             throw new Zend_InfoCard_Cipher_Exception("Use of this PKI RSA Adapter requires the openssl extension loaded");
         }
         // @codeCoverageIgnoreEnd
@@ -79,10 +78,11 @@ class Zend_InfoCard_Cipher_Pki_Adapter_Rsa
         $private_key = openssl_pkey_get_private(array($privateKey, $password));
 
         if(!$private_key) {
+            #require_once 'Zend/InfoCard/Cipher/Exception.php';
             throw new Zend_InfoCard_Cipher_Exception("Failed to load private key");
         }
 
-        if(!is_null($padding)) {
+        if($padding !== null) {
             try {
                 $this->setPadding($padding);
             } catch(Exception $e) {
@@ -105,6 +105,7 @@ class Zend_InfoCard_Cipher_Pki_Adapter_Rsa
         openssl_free_key($private_key);
 
         if(!$result) {
+            #require_once 'Zend/InfoCard/Cipher/Exception.php';
             throw new Zend_InfoCard_Cipher_Exception("Unable to Decrypt Value using provided private key");
         }
 

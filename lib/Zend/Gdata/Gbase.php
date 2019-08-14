@@ -15,34 +15,36 @@
  *
  * @category   Zend
  * @package    Zend_Gdata
- * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
+ * @subpackage Gbase
+ * @copyright  Copyright (c) 2005-2010 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
+ * @version    $Id: Gbase.php 20096 2010-01-06 02:05:09Z bkarwin $
  */
 
 /**
  * @see Zend_Gdata
  */
-require_once 'Zend/Gdata.php';
+#require_once 'Zend/Gdata.php';
 
 /**
  * @see Zend_Gdata_Gbase_ItemFeed
  */
-require_once 'Zend/Gdata/Gbase/ItemFeed.php';
+#require_once 'Zend/Gdata/Gbase/ItemFeed.php';
 
 /**
  * @see Zend_Gdata_Gbase_ItemEntry
  */
-require_once 'Zend/Gdata/Gbase/ItemEntry.php';
+#require_once 'Zend/Gdata/Gbase/ItemEntry.php';
 
 /**
  * @see Zend_Gdata_Gbase_SnippetEntry
  */
-require_once 'Zend/Gdata/Gbase/SnippetEntry.php';
+#require_once 'Zend/Gdata/Gbase/SnippetEntry.php';
 
 /**
  * @see Zend_Gdata_Gbase_SnippetFeed
  */
-require_once 'Zend/Gdata/Gbase/SnippetFeed.php';
+#require_once 'Zend/Gdata/Gbase/SnippetFeed.php';
 
 /**
  * Service class for interacting with the Google Base data API
@@ -51,7 +53,8 @@ require_once 'Zend/Gdata/Gbase/SnippetFeed.php';
  *
  * @category   Zend
  * @package    Zend_Gdata
- * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
+ * @subpackage Gbase
+ * @copyright  Copyright (c) 2005-2010 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 class Zend_Gdata_Gbase extends Zend_Gdata
@@ -76,12 +79,18 @@ class Zend_Gdata_Gbase extends Zend_Gdata
      * The default URI for POST methods
      *
      * @var string
-     */    
+     */
     protected $_defaultPostUri = self::GBASE_ITEM_FEED_URI;
 
+    /**
+     * Namespaces used for Zend_Gdata_Gbase
+     *
+     * @var array
+     */
     public static $namespaces = array(
-            'g' => 'http://base.google.com/ns/1.0',
-            'batch' => 'http://schemas.google.com/gdata/batch');
+        array('g', 'http://base.google.com/ns/1.0', 1, 0),
+        array('batch', 'http://schemas.google.com/gdata/batch', 1, 0)
+    );
 
     /**
      * Create Zend_Gdata_Gbase object
@@ -125,7 +134,7 @@ class Zend_Gdata_Gbase extends Zend_Gdata
     public function getGbaseItemEntry($location = null)
     {
         if ($location === null) {
-            require_once 'Zend/Gdata/App/InvalidArgumentException.php';
+            #require_once 'Zend/Gdata/App/InvalidArgumentException.php';
             throw new Zend_Gdata_App_InvalidArgumentException(
                     'Location must not be null');
         } else if ($location instanceof Zend_Gdata_Query) {

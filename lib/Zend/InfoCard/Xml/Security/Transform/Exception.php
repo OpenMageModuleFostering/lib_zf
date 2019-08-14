@@ -15,25 +15,23 @@
  * @category   Zend
  * @package    Zend_InfoCard
  * @subpackage Zend_InfoCard_Xml_Security
- * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2010 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: Exception.php 8064 2008-02-16 10:58:39Z thomas $
- * @author     John Coggeshall <john@zend.com>
+ * @version    $Id: Exception.php 20096 2010-01-06 02:05:09Z bkarwin $
  */
 
 /**
  * Zend_InfoCard_Xml_Security_Exception
  */
-require_once 'Zend/InfoCard/Xml/Security/Exception.php';
+#require_once 'Zend/InfoCard/Xml/Security/Exception.php';
 
 /**
  * @category   Zend
  * @package    Zend_InfoCard
  * @subpackage Zend_InfoCard_Xml_Security
- * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2010 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @author     John Coggeshall <john@zend.com>
  */
-class Zend_InfoCard_Xml_Security_Transform_Exception extends Zend_InfoCard_Xml_Security_Exception 
+class Zend_InfoCard_Xml_Security_Transform_Exception extends Zend_InfoCard_Xml_Security_Exception
 {
 }

@@ -15,21 +15,20 @@
  * @category   Zend
  * @package    Zend_InfoCard
  * @subpackage Zend_InfoCard_Xml
- * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2010 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: Default.php 8064 2008-02-16 10:58:39Z thomas $
- * @author     John Coggeshall <john@zend.com>
+ * @version    $Id: Default.php 20096 2010-01-06 02:05:09Z bkarwin $
  */
 
 /**
  * Zend_InfoCard_Xml_KeyInfo_Abstract
  */
-require_once 'Zend/InfoCard/Xml/KeyInfo/Abstract.php';
+#require_once 'Zend/InfoCard/Xml/KeyInfo/Abstract.php';
 
 /**
  * Zend_InfoCard_Xml_SecurityTokenReference
  */
-require_once 'Zend/InfoCard/Xml/SecurityTokenReference.php';
+#require_once 'Zend/InfoCard/Xml/SecurityTokenReference.php';
 
 /**
  * An object representation of a XML <KeyInfo> block which doesn't provide a namespace
@@ -39,9 +38,8 @@ require_once 'Zend/InfoCard/Xml/SecurityTokenReference.php';
  * @category   Zend
  * @package    Zend_InfoCard
  * @subpackage Zend_InfoCard_Xml
- * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2010 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @author     John Coggeshall <john@zend.com>
  */
 class Zend_InfoCard_Xml_KeyInfo_Default extends Zend_InfoCard_Xml_KeyInfo_Abstract
 {

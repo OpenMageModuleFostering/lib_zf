@@ -15,16 +15,15 @@
  * @category   Zend
  * @package    Zend_InfoCard
  * @subpackage Zend_InfoCard_Xml
- * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2010 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: XmlEnc.php 8064 2008-02-16 10:58:39Z thomas $
- * @author     John Coggeshall <john@zend.com>
+ * @version    $Id: XmlEnc.php 20096 2010-01-06 02:05:09Z bkarwin $
  */
 
 /**
  * Zend_InfoCard_Xml_EncryptedData/Abstract.php
  */
-require_once 'Zend/InfoCard/Xml/EncryptedData/Abstract.php';
+#require_once 'Zend/InfoCard/Xml/EncryptedData/Abstract.php';
 
 /**
  * An XmlEnc formatted EncryptedData XML block
@@ -32,9 +31,8 @@ require_once 'Zend/InfoCard/Xml/EncryptedData/Abstract.php';
  * @category   Zend
  * @package    Zend_InfoCard
  * @subpackage Zend_InfoCard_Xml
- * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2010 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @author     John Coggeshall <john@zend.com>
  */
 class Zend_InfoCard_Xml_EncryptedData_XmlEnc extends Zend_InfoCard_Xml_EncryptedData_Abstract
 {

@@ -1,15 +1,10 @@
 {
-    "name": "OpenMageModuleFostering/Lib_ZF",
+    "name": "OpenMageModuleFostering/lib_zf",
     "type": "magento-module",
-    "license": "New-BSD",
+    "license": "",
     "homepage": "",
-    "description": "Zend Framework",
-    "authors": [
-    {
-        "name": "Moshe",
-        "email": "moshe@varien.com"
-    }
-],
+    "description": "",
+    "authors": null,
     "suggest": {
         "magento-hackathon/magento-composer-installer": "*"
     }

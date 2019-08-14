@@ -14,26 +14,27 @@
  *
  * @category   Zend
  * @package    Zend_Mime
- * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2010 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
+ * @version    $Id: Message.php 20096 2010-01-06 02:05:09Z bkarwin $
  */
 
 
 /**
  * Zend_Mime
  */
-require_once 'Zend/Mime.php';
+#require_once 'Zend/Mime.php';
 
 /**
  * Zend_Mime_Part
  */
-require_once 'Zend/Mime/Part.php';
+#require_once 'Zend/Mime/Part.php';
 
 
 /**
  * @category   Zend
  * @package    Zend_Mime
- * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2010 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 class Zend_Mime_Message
@@ -241,19 +242,18 @@ class Zend_Mime_Message
      */
     public static function createFromMessage($message, $boundary, $EOL = Zend_Mime::LINEEND)
     {
-        require_once 'Zend/Mime/Decode.php';
+        #require_once 'Zend/Mime/Decode.php';
         $parts = Zend_Mime_Decode::splitMessageStruct($message, $boundary, $EOL);
 
         $res = new self();
         foreach ($parts as $part) {
             // now we build a new MimePart for the current Message Part:
-            $newPart = new Zend_Mime_Part($part);
+            $newPart = new Zend_Mime_Part($part['body']);
             foreach ($part['header'] as $key => $value) {
                 /**
                  * @todo check for characterset and filename
                  */
-                // list($key, $value) = $header;
-                switch($key) {
+                switch(strtolower($key)) {
                     case 'content-type':
                         $newPart->type = $value;
                         break;
@@ -263,11 +263,17 @@ class Zend_Mime_Message
                     case 'content-id':
                         $newPart->id = trim($value,'<>');
                         break;
-                    case 'Content-Disposition':
+                    case 'content-disposition':
                         $newPart->disposition = $value;
                         break;
                     case 'content-description':
                         $newPart->description = $value;
+                        break;
+                    case 'content-location':
+                        $newPart->location = $value;
+                        break;
+                    case 'content-language':
+                        $newPart->language = $value;
                         break;
                     default:
                         throw new Zend_Exception('Unknown header ignored for MimePart:' . $key);

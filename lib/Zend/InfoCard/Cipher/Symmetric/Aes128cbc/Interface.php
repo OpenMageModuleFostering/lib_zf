@@ -15,26 +15,24 @@
  * @category   Zend
  * @package    Zend_InfoCard
  * @subpackage Zend_InfoCard_Cipher
- * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2010 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: Interface.php 8064 2008-02-16 10:58:39Z thomas $
- * @author     John Coggeshall <john@zend.com>
+ * @version    $Id: Interface.php 20096 2010-01-06 02:05:09Z bkarwin $
  */
 
 /**
  * Zend_InfoCard_Cipher_Symmetric_Aes256cbc_Interface
  */
-require_once 'Zend/InfoCard/Cipher/Symmetric/Aes256cbc/Interface.php';
+#require_once 'Zend/InfoCard/Cipher/Symmetric/Aes256cbc/Interface.php';
 
 /**
  * @category   Zend
  * @package    Zend_InfoCard
  * @subpackage Zend_InfoCard_Cipher
- * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2010 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @author     John Coggeshall <john@zend.com>
  */
-interface Zend_InfoCard_Cipher_Symmetric_Aes128cbc_Interface 
-    extends Zend_InfoCard_Cipher_Symmetric_Aes256cbc_Interface 
+interface Zend_InfoCard_Cipher_Symmetric_Aes128cbc_Interface
+    extends Zend_InfoCard_Cipher_Symmetric_Aes256cbc_Interface
 {
 }
