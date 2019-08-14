@@ -15,9 +15,9 @@
  * @category   Zend
  * @package    Zend_Mail
  * @subpackage Transport
- * @copyright  Copyright (c) 2005-2015 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id$
+ * @version    $Id: Sendmail.php 24593 2012-01-05 20:35:02Z matthew $
  */
 
 
@@ -33,7 +33,7 @@
  * @category   Zend
  * @package    Zend_Mail
  * @subpackage Transport
- * @copyright  Copyright (c) 2005-2015 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 class Zend_Mail_Transport_Sendmail extends Zend_Mail_Transport_Abstract
@@ -119,19 +119,14 @@ class Zend_Mail_Transport_Sendmail extends Zend_Mail_Transport_Abstract
                 );
             }
 
-            // Sanitize the From header
-            if (!Zend_Validate::is(str_replace(' ', '', $this->parameters), 'EmailAddress')) {
-                throw new Zend_Mail_Transport_Exception('Potential code injection in From header');
-            } else {
-                set_error_handler(array($this, '_handleMailErrors'));
-                $result = mail(
-                    $this->recipients,
-                    $this->_mail->getSubject(),
-                    $this->body,
-                    $this->header,
-                    $this->parameters);
-                restore_error_handler();
-            }
+            set_error_handler(array($this, '_handleMailErrors'));
+            $result = mail(
+                $this->recipients,
+                $this->_mail->getSubject(),
+                $this->body,
+                $this->header,
+                $this->parameters);
+            restore_error_handler();
         }
 
         if ($this->_errstr !== null || !$result) {
